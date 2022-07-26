@@ -1,6 +1,6 @@
 {
-  "name": "Hemisferio",
-  "short_name": "Hemisferio",
+  "name": "Hemisferio.Client",
+  "short_name": "Hemisferio.Client",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#ffffff",

@@ -1,0 +1,125 @@
+﻿@using Hemisferio.Client.Shared.Extensions
+@using Hemisferio.Client.Shared.Components
+
+@inject Microsoft.Extensions.Localization.IStringLocalizer<TimeZoneSelector> Loc
+@{
+    userCulture ??= "en-US";
+    userCountryCode ??= userCountryCode!;
+    userTimeZoneId ??= userTimeZoneId;
+    var displayNumber = 123.45M;
+    var displayDateTime = new DateTime(2000, 10, 1, 17, 32, 55);
+    var currentCulture = System.Globalization.CultureInfo.CurrentUICulture;
+    var numericFormat = $"0{currentCulture.NumberFormat.NumberDecimalSeparator}00";
+    var dateFormat = currentCulture.DateTimeFormat.ShortDatePattern;
+    var timeFormat = currentCulture.DateTimeFormat.ShortTimePattern;
+    var exampleTitle = Loc["This is an example"];
+}
+@if (!string.IsNullOrEmpty(SelectedCultureName))
+{
+    <div>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-triangle" viewBox="0 0 16 16">
+            <path d="M7.938 2.016A.13.13 0 0 1 8.002 2a.13.13 0 0 1 .063.016.146.146 0 0 1 .054.057l6.857 11.667c.036.06.035.124.002.183a.163.163 0 0 1-.054.06.116.116 0 0 1-.066.017H1.146a.115.115 0 0 1-.066-.017.163.163 0 0 1-.054-.06.176.176 0 0 1 .002-.183L7.884 2.073a.147.147 0 0 1 .054-.057zm1.044-.45a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566z" />
+            <path d="M7.002 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 5.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995z" />
+        </svg>
+        The currently detected localization is not yet supported by this system.
+        <br />
+        Please select one of the available ones.
+    </div>
+}
+<div class="form-group">
+    <label asp-for="User.Culture">@Loc["Language"]</label>
+    <select id="languageSelector" asp-for="User.Culture" class="form-control" @onchange="SetLanguage">
+        @foreach (var culture in GetSupportedLanguages())
+        {
+            var cultureName = culture.NativeName.Capitalize();
+            if (userCulture.StartsWith(culture.Name))
+            {
+                <option value="@culture.Name" selected="selected">@cultureName</option>
+            }
+            else
+            {
+                <option value="@culture.Name">@cultureName</option>
+            }
+        }
+    </select>
+</div>
+<div class="form-group">
+    <label asp-for="User.Culture">@Loc["Localization"]</label>
+    <select id="cultureSelector" asp-for="User.Culture" class="form-control" @onchange="SetCulture">
+        @if (CultureList != null)
+        {
+            foreach (var culture in CultureList)
+            {
+                var cultureName = culture.NativeName.Capitalize();
+                if (culture.Name == userCulture)
+                {
+                    <option value="@culture.Name" selected="selected">@cultureName</option>
+                }
+                else
+                {
+                    <option value="@culture.Name">@cultureName</option>
+                }
+            }
+        }
+    </select>
+        <table class="cultureFormat">
+        <tr><td>@Loc["Date format"]</td><td><span>@dateFormat</span></td><td><span title="@exampleTitle">@displayDateTime.ToShortDateString()</span></td></tr>
+        <tr><td>@Loc["Time format"]</td><td><span>@timeFormat</span></td><td><span title="@exampleTitle">@displayDateTime.ToShortTimeString()</span></td></tr>
+        <tr><td>@Loc["Number format"]</td><td><span>@numericFormat</span></td><td><span title="@exampleTitle">@displayNumber</span></td></tr>
+    </table>
+</div>
+<div class="form-group">
+    <label asp-for="TimeZoneCountry">@Loc["Country"]</label>
+    <select asp-for="TimeZoneCountry" class="form-control" @onchange="SetCountry">
+        @foreach (var country in Countries)
+        {
+            if (string.IsNullOrEmpty(userCountryCode))
+            {
+                if (SelectedCultureName?.Contains(country.Value) == true)
+                {
+                    <option value="@country.Key" selected="selected">@country.Value</option>
+                }
+                else
+                {
+                    <option value="@country.Key">@country.Value</option>
+                }
+            }
+            else if (country.Key == userCountryCode)
+            {
+                <option value="@country.Key" selected="selected">@country.Value</option>
+            }
+            else
+            {
+                <option value="@country.Key">@country.Value</option>
+            }
+        }
+    </select>
+</div>
+<div class="form-group">
+    <label asp-for="TimeZone">@Loc["Time Zone"]</label>
+    <select asp-for="TimeZone" class="form-control" @onchange="SetTimeZone">
+        @foreach (var timeZone in TimeZones)
+        {
+            if (timeZone.Key == userTimeZoneId)
+            {
+                <option value="@timeZone.Key" selected="selected">@timeZone.Value</option>
+            }
+            else
+            {
+                <option value="@timeZone.Key">@timeZone.Value</option>
+            }
+        }
+    </select>
+    <table class="cultureFormat local-time">
+        <tr><td>@Loc["Local Time"]</td><td><span><LocalDateTimeClock TimeZoneId="@userTimeZoneId" /></span></td></tr>
+    </table>
+</div>
+
+@if (ShowContinueSetup)
+{
+    <div class="form-group">
+        <ul class="btnOptions">
+            <li><a class="btn btn-primary" href="/Identity/Account/Manage/?setup">@Loc["Continue configuring My Profile"]</a></li>
+        </ul>
+    </div>
+}
